@@ -3,9 +3,9 @@
 use Illuminate\Support\Facades\Route;
 
 /*
-|--------------------------------------------------------------------------
+|-----------------------------------------
 | Web Routes
-|--------------------------------------------------------------------------
+|-----------------------------------------
 |
 | Here is where you can register web routes for your application. These
 | routes are loaded by the RouteServiceProvider within a group which
@@ -22,8 +22,15 @@ Route::get('/dashboard', function () {
 })->middleware(['auth'])->name('dashboard');
 
 require __DIR__.'/auth.php';
-// Admin Login Route without admin group
-Route::get('admin/login', "App\Http\Controllers\Admin\AdminController@login");
 
-// Admin Dashboard Route with out admin group
-Route::get('admin/dashboard', 'App\Http\Controllers\Admin\AdminController@dashboard')->name('admin.dashboard');
+Route::prefix('/admin')->namespace('App\Http\Controllers\Admin')->group(function(){
+  // Admin Login Route
+  Route::match(['get', 'post'], 'login', "AdminController@login");
+
+  Route::group(['middleware' => ['admin']], function(){
+    // Admin Dashboard Route
+    Route::get('dashboard', 'AdminController@dashboard');
+    // AdminLogout
+    Route::get('logout', 'AdminController@logout');
+  });
+});
